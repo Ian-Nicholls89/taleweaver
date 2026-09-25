@@ -5,6 +5,12 @@ services:
     container_name: taleweaver
     restart: unless-stopped
     env_file: .env
+    environment:
+      # Fixed on purpose: this is the port the app listens on *inside* the
+      # container. PORT in .env only chooses the port on the host, below —
+      # it must not also reach the app itself, or the two disagree and the
+      # healthcheck (which checks this fixed port) fails.
+      - PORT=3000
     ports:
       # Only reachable from this machine by default: point your reverse proxy at it.
       # Set BIND_ADDRESS=0.0.0.0 in .env if the proxy runs on another machine.
