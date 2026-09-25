@@ -1,0 +1,80 @@
+[
+  {
+    "id": "brenna",
+    "blurb": "A dwarf soldier turned sellsword. Tough as an anvil, straightforward, hard to knock down.",
+    "input": {
+      "name": "Brenna Ironhollow",
+      "species": "Dwarf",
+      "className": "Fighter",
+      "background": "Soldier",
+      "level": 1,
+      "skills": ["perception", "survival"],
+      "description": "Stocky dwarf in dented chain mail, braided red beard-rings, dry sense of humour, fiercely loyal."
+    }
+  },
+  {
+    "id": "wren",
+    "blurb": "A halfling thief with quick fingers and quicker excuses. Best at sneaking, talking and stabbing first.",
+    "input": {
+      "name": "Wren Tealeaf",
+      "species": "Halfling",
+      "className": "Rogue",
+      "background": "Criminal",
+      "level": 1,
+      "skills": ["acrobatics", "deception", "perception", "investigation"],
+      "description": "Small, freckled and grinning; wears a patched green cloak with far too many pockets."
+    }
+  },
+  {
+    "id": "oriel",
+    "blurb": "An elf wizard who left the academy to see magic in the wild. Fragile, clever, and full of spells.",
+    "input": {
+      "name": "Oriel Vantis",
+      "species": "Elf",
+      "className": "Wizard",
+      "background": "Sage",
+      "level": 1,
+      "skills": ["investigation", "insight"],
+      "description": "Tall and ink-stained, silver hair tied back with a quill; curious to a fault."
+    }
+  },
+  {
+    "id": "tamsin",
+    "blurb": "A human cleric of a sun god who heals the hurt and smites the undead. Sturdy and kind.",
+    "input": {
+      "name": "Tamsin Hale",
+      "species": "Human",
+      "className": "Cleric",
+      "background": "Acolyte",
+      "level": 1,
+      "skills": ["medicine", "persuasion"],
+      "description": "Broad-shouldered, warm-voiced, wears a sunburst amulet and a mended grey robe over her armour."
+    }
+  },
+  {
+    "id": "kesh",
+    "blurb": "A goliath ranger who tracks monsters through the high passes. Deadly with a bow, at home in the wild.",
+    "input": {
+      "name": "Kesh Stonewalker",
+      "species": "Goliath",
+      "className": "Ranger",
+      "background": "Soldier",
+      "level": 1,
+      "skills": ["nature", "stealth", "survival"],
+      "description": "Grey-skinned, tattooed with mountain runes, quiet and patient; carries a longbow taller than most people."
+    }
+  },
+  {
+    "id": "vesper",
+    "blurb": "A tiefling warlock bound to a devilish patron she is trying to outwit. Charming, dangerous, full of secrets.",
+    "input": {
+      "name": "Vesper Ashgrove",
+      "species": "Tiefling",
+      "className": "Warlock",
+      "background": "Sage",
+      "level": 1,
+      "skills": ["deception", "investigation"],
+      "description": "Crimson skin, curling horns hung with tiny silver bells, a sly smile and a book she never lets anyone read."
+    }
+  }
+]

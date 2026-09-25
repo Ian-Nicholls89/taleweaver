@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Cinzel', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  --font-story: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  --color-ink-950: #0c0a09;
+  --color-ink-900: #16120f;
+  --color-ink-800: #211b16;
+  --color-ink-700: #2e261f;
+  --color-ink-600: #43382d;
+  --color-parchment: #efe3c8;
+  --color-parchment-dim: #c9b994;
+  --color-ember: #e0892b;
+  --color-ember-bright: #f5a54a;
+  --color-blood: #b3342b;
+  --color-verdant: #5f9f58;
+  --color-arcane: #8b7fd6;
+}
+
+:root {
+  --header-h: 52px;
+}
+
+html,
+body {
+  background: var(--color-ink-950);
+  color: var(--color-parchment);
+}
+
+body {
+  background-image: radial-gradient(ellipse at top, rgba(224, 137, 43, 0.08), transparent 60%);
+  min-height: 100vh;
+}
+
+.story p + p {
+  margin-top: 0.8em;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-600) transparent;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out both;
+}
+
+@keyframes dice-pop {
+  0% {
+    transform: scale(0.6) rotate(-20deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+.animate-dice {
+  animation: dice-pop 0.4s ease-out both;
+}

@@ -1,0 +1,18 @@
+services:
+  taleweaver:
+    build: .
+    image: taleweaver:latest
+    container_name: taleweaver
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      # Only reachable from this machine by default: point your reverse proxy at it.
+      # Set BIND_ADDRESS=0.0.0.0 in .env if the proxy runs on another machine.
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:3000"
+    volumes:
+      - taleweaver-data:/app/data
+      # Optional: your own ambience and sound-effect files (see public/audio/README.md).
+      # - ./audio:/app/public/audio:ro
+
+volumes:
+  taleweaver-data:
