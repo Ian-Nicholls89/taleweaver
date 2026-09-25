@@ -203,13 +203,14 @@ export function runTurn(game: Game, user: { id: string; role: string }, playerTe
           void maybeSummarise(game.id, user.id).catch((e) => console.error('[taleweaver] summary failed', e));
         } catch (err) {
           console.error('[taleweaver] turn failed', err);
-          // Keep any state changes from tools that already ran (dice were rolled, damage dealt).
-          if (ctx.events.length) {
-            db.insert(schema.messages)
-              .values({ gameId: game.id, role: 'dm', content: narration.trim() || '*(The DM was interrupted.)*', events: ctx.events })
-              .run();
-            db.update(schema.games).set({ character, state, updatedAt: Date.now() }).where(eq(schema.games.id, game.id)).run();
-          }
+          // Keep any state changes from tools that already ran (dice were rolled, damage dealt),
+          // and make the break visible in the transcript rather than saving a silently truncated
+          // fragment — a dropped connection or provider hiccup shouldn't look like corrupted narration.
+          const interrupted = narration.trim()
+            ? `${narration.trim()}\n\n*(The story was interrupted here — just describe what you do next.)*`
+            : '*(The DM was interrupted before replying. Describe what you do, or try again.)*';
+          db.insert(schema.messages).values({ gameId: game.id, role: 'dm', content: interrupted, events: ctx.events }).run();
+          db.update(schema.games).set({ character, state, updatedAt: Date.now() }).where(eq(schema.games.id, game.id)).run();
           send({ t: 'error', message: friendlyError(err) });
         } finally {
           busy.delete(game.id);
