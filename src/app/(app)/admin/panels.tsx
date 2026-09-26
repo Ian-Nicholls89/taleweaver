@@ -181,7 +181,14 @@ export function UsersPanel({ users, meId }: { users: User[]; meId: string }) {
 
 // ---------------- providers ----------------
 
-type ProviderInfo = { id: string; label: string; keyUrl: string; note: string | null };
+type ProviderInfo = {
+  id: string;
+  label: string;
+  keyUrl: string;
+  note: string | null;
+  credentialType?: 'apiKey' | 'url';
+  urlPlaceholder?: string | null;
+};
 
 export function ProvidersPanel({
   status,
@@ -198,8 +205,9 @@ export function ProvidersPanel({
   const [editing, setEditing] = useState<string | null>(null);
   const [key, setKey] = useState('');
 
-  const row = (p: { id: string; label: string; keyUrl: string; note?: string | null; usedFor?: string }, isLlm: boolean) => {
+  const row = (p: { id: string; label: string; keyUrl: string; note?: string | null; usedFor?: string; credentialType?: 'apiKey' | 'url'; urlPlaceholder?: string | null }, isLlm: boolean) => {
     const s = status[p.id];
+    const isUrl = p.credentialType === 'url';
     return (
       <li key={p.id} className="py-2.5">
         <div className="flex flex-wrap items-center gap-2">
@@ -207,9 +215,9 @@ export function ProvidersPanel({
             {p.label}
             {p.usedFor && <span className="ml-2 text-xs text-parchment-dim">{p.usedFor}</span>}
           </span>
-          {s ? <Tag tone="ember">key {s.hint}</Tag> : <Tag>no key</Tag>}
+          {s ? <Tag tone="ember">{isUrl ? s.hint : `key ${s.hint}`}</Tag> : <Tag>{isUrl ? 'not set' : 'no key'}</Tag>}
           <Button variant="ghost" className="!px-2 !py-0.5 text-xs" onClick={() => (setEditing(editing === p.id ? null : p.id), setKey(''))}>
-            {s ? 'Replace key' : 'Add key'}
+            {s ? (isUrl ? 'Change URL' : 'Replace key') : isUrl ? 'Set URL' : 'Add key'}
           </Button>
           {s && isLlm && (
             <Button
@@ -225,7 +233,7 @@ export function ProvidersPanel({
             </Button>
           )}
           {s && (
-            <Button variant="ghost" className="!px-2 !py-0.5 text-xs" disabled={!!busy} onClick={() => confirm(`Remove the ${p.label} key? Its models will be disabled.`) && run(p.id, () => apiFetch(`/api/admin/providers/${p.id}`, { method: 'DELETE' }))}>
+            <Button variant="ghost" className="!px-2 !py-0.5 text-xs" disabled={!!busy} onClick={() => confirm(`Remove the ${p.label} ${isUrl ? 'address' : 'key'}? Its models will be disabled.`) && run(p.id, () => apiFetch(`/api/admin/providers/${p.id}`, { method: 'DELETE' }))}>
               Remove
             </Button>
           )}
@@ -240,16 +248,23 @@ export function ProvidersPanel({
                 await apiFetch(`/api/admin/providers/${p.id}`, { method: 'PUT', json: { apiKey: key } });
                 setEditing(null);
                 setKey('');
-              }, `${p.label} key saved.${isLlm ? ' Now fetch its models.' : ''}`);
+              }, `${p.label} ${isUrl ? 'address' : 'key'} saved.${isLlm ? ' Now fetch its models.' : ''}`);
             }}
           >
-            <Input type="password" autoComplete="off" value={key} onChange={(e) => setKey(e.target.value)} placeholder="Paste API key" className="max-w-md flex-1" />
-            <Button type="submit" disabled={key.length < 8 || !!busy}>
+            <Input
+              type={isUrl ? 'text' : 'password'}
+              autoComplete="off"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              placeholder={isUrl ? p.urlPlaceholder ?? 'http://host.docker.internal:11434' : 'Paste API key'}
+              className="max-w-md flex-1"
+            />
+            <Button type="submit" disabled={(isUrl ? !/^https?:\/\/.+/.test(key) : key.length < 8) || !!busy}>
               Save
             </Button>
             {p.keyUrl && (
               <a href={p.keyUrl} target="_blank" rel="noreferrer" className="self-center text-xs text-ember hover:underline">
-                Get a key ↗
+                {isUrl ? 'Install Ollama ↗' : 'Get a key ↗'}
               </a>
             )}
           </form>

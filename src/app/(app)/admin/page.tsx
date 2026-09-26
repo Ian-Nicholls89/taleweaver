@@ -60,7 +60,14 @@ export default async function AdminPage() {
           </p>
           <ProvidersPanel
             status={keyStatus()}
-            llm={Object.entries(LLM_PROVIDERS).map(([id, p]) => ({ id, label: p.label, keyUrl: p.keyUrl, note: p.note ?? null }))}
+            llm={Object.entries(LLM_PROVIDERS).map(([id, p]) => ({
+              id,
+              label: p.label,
+              keyUrl: p.keyUrl,
+              note: p.note ?? null,
+              credentialType: p.credentialType ?? 'apiKey',
+              urlPlaceholder: p.urlPlaceholder ?? null,
+            }))}
             other={Object.entries(OTHER_KEY_PROVIDERS).map(([id, p]) => ({ id, ...p }))}
             mock={mockEnabled()}
           />

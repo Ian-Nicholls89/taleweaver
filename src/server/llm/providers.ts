@@ -9,6 +9,7 @@ import { createCerebras } from '@ai-sdk/cerebras';
 import { createDeepSeek } from '@ai-sdk/deepseek';
 import { createPerplexity } from '@ai-sdk/perplexity';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { createOllama } from 'ollama-ai-provider-v2';
 import { createMockModel } from './mock';
 
 export type ListedModel = { modelId: string; label: string; toolSupport: boolean };
@@ -16,9 +17,15 @@ export type ListedModel = { modelId: string; label: string; toolSupport: boolean
 type ProviderDef = {
   label: string;
   keyUrl: string;
-  create: (apiKey: string, modelId: string) => LanguageModel;
-  listModels: (apiKey: string) => Promise<ListedModel[]>;
+  create: (credential: string, modelId: string) => LanguageModel;
+  listModels: (credential: string) => Promise<ListedModel[]>;
   note?: string;
+  /**
+   * 'apiKey' (default): a secret pasted from the provider's dashboard, masked in the admin UI.
+   * 'url': a server address, not a secret — shown in full, e.g. a local Ollama instance.
+   */
+  credentialType?: 'apiKey' | 'url';
+  urlPlaceholder?: string;
 };
 
 async function getJson(url: string, headers: Record<string, string> = {}) {
@@ -31,6 +38,11 @@ async function getJson(url: string, headers: Record<string, string> = {}) {
 }
 
 const bearer = (key: string) => ({ Authorization: `Bearer ${key}` });
+
+/** Strips a trailing slash so "http://host:11434/" and "http://host:11434" both work. */
+function normaliseUrl(url: string) {
+  return url.trim().replace(/\/+$/, '');
+}
 
 /** OpenAI-style `GET /models` → `{ data: [{ id }] }`, filtered to chat models. */
 function openAiStyleList(url: string, exclude: RegExp, include?: RegExp) {
@@ -149,6 +161,19 @@ export const LLM_PROVIDERS: Record<string, ProviderDef> = {
           label: m.name ?? m.id,
           toolSupport: (m.supported_parameters ?? []).includes('tools'),
         }));
+    },
+  },
+  ollama: {
+    label: 'Ollama (local)',
+    keyUrl: 'https://ollama.com/download',
+    credentialType: 'url',
+    urlPlaceholder: 'http://host.docker.internal:11434',
+    note:
+      "Runs on your own machine — free and private, only as fast as your hardware. If Ollama runs on the Docker host (not in this container), \"localhost\" won't reach it — use http://host.docker.internal:11434 instead (already wired up in docker-compose.yml). Ollama also needs to be told to listen beyond its own machine: run it with OLLAMA_HOST=0.0.0.0 set, or it will refuse the connection even with the right address. Tool calling (dice, HP tracking) needs a model that supports it — llama3.1, qwen2.5 and mistral-nemo do; older or very small models often don't.",
+    create: (baseUrl, id) => createOllama({ baseURL: `${normaliseUrl(baseUrl)}/api`, compatibility: 'strict' })(id),
+    listModels: async (baseUrl) => {
+      const json = await getJson(`${normaliseUrl(baseUrl)}/api/tags`);
+      return (json.models ?? []).map((m: any) => ({ modelId: m.name, label: m.name, toolSupport: true }));
     },
   },
 };

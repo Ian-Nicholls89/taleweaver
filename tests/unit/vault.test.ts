@@ -26,4 +26,10 @@ describe('key vault', () => {
     expect(status.anthropic?.hint).toBe('…3456');
     expect(JSON.stringify(status)).not.toContain('abcdef');
   });
+
+  it('shows a url-type credential (e.g. Ollama) in full, since it is not a secret', () => {
+    setProviderKey('ollama', 'http://host.docker.internal:11434');
+    const status = keyStatus();
+    expect(status.ollama?.hint).toBe('http://host.docker.internal:11434');
+  });
 });

@@ -45,7 +45,8 @@ export function keyStatus() {
     let hint = '••••';
     try {
       const k = decrypt(r.encryptedKey);
-      hint = k.length > 8 ? `…${k.slice(-4)}` : '••••';
+      // A URL (e.g. a local Ollama address) isn't a secret, so show it in full rather than masking it.
+      hint = providerDef(r.provider)?.credentialType === 'url' ? k : k.length > 8 ? `…${k.slice(-4)}` : '••••';
     } catch {
       hint = 'unreadable';
     }

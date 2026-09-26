@@ -2,7 +2,7 @@
 
 A self-hosted web app for solo, theatre-of-the-mind Dungeons & Dragons one-shots, with an AI as the Dungeon Master.
 
-- **An AI Dungeon Master.** Pick from Claude, Gemini, OpenAI, Groq, Grok, Mistral, Cerebras, DeepSeek, Perplexity or anything on OpenRouter. The DM narrates, voices NPCs and runs the rules. Dice rolls, checks, attacks, HP, inventory and conditions are handled by server-side tools, so the numbers are real and nothing is made up.
+- **An AI Dungeon Master.** Pick from Claude, Gemini, OpenAI, Groq, Grok, Mistral, Cerebras, DeepSeek, Perplexity, anything on OpenRouter, or a locally-hosted **Ollama** model — no API key, no cost, nothing leaves your network. The DM narrates, voices NPCs and runs the rules. Dice rolls, checks, attacks, HP, inventory and conditions are handled by server-side tools, so the numbers are real and nothing is made up.
 - **One-shots with a title and blurb.** The app ships with six original adventures. The AI can also pitch three new ones on demand and write up the one you choose. As admin, you can import adventures you own (PDF or Markdown) for private use.
 - **Pictures and sound.** Each new scene gets an illustration, from OpenAI, Replicate (FLUX), Stability AI or your own GPU (Automatic1111 or ComfyUI), or no images at all. Ambience and sound effects follow the story. They're synthesised in the browser out of the box, or you can drop in your own files. The DM's narration can be read aloud with the browser's voices, OpenAI TTS or ElevenLabs.
 - **Private by default.** Everyone logs in. New accounts can only be created from single-use invite links made by an admin.
@@ -74,6 +74,25 @@ server {
 **Cloudflare Tunnel** (no open ports on your router): add a public hostname `dnd.example.com` → service `http://localhost:3000` in the tunnel's configuration.
 
 If the reverse proxy runs on a different machine from the app, set `BIND_ADDRESS=0.0.0.0` in `.env`. Then firewall port 3000 so that only the proxy can reach it.
+
+## Using a local model with Ollama
+
+If you'd rather run the Dungeon Master on your own hardware, free and fully private, [install Ollama](https://ollama.com/download) and pull a model that supports tool calling — `llama3.1`, `qwen2.5` and `mistral-nemo` all work; smaller or older models often can't roll dice or track HP reliably:
+
+```bash
+ollama pull llama3.1
+```
+
+Two things need to be true for Taleweaver's container to reach it:
+
+1. **Ollama must listen on more than just `localhost`.** By default it only accepts connections from the same machine, which a container can't do. Run it with:
+   ```bash
+   OLLAMA_HOST=0.0.0.0 ollama serve
+   ```
+   (or set `OLLAMA_HOST=0.0.0.0` in whatever service file starts it, e.g. its systemd unit, then restart it).
+2. **Use `http://host.docker.internal:11434` as the address**, not `http://localhost:11434` — inside the container, "localhost" means the container itself. `docker-compose.yml` already maps `host.docker.internal` to the host for you.
+
+Then in **Admin → AI models**, find **Ollama (local)**, set the URL to `http://host.docker.internal:11434`, and press **Fetch models** — your locally pulled models will appear to enable, exactly like any other provider. If Ollama runs on a *different* machine on your network, use that machine's LAN IP instead.
 
 ## Costs, roughly
 

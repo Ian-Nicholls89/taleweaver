@@ -19,6 +19,11 @@ services:
       - taleweaver-data:/app/data
       # Optional: your own ambience and sound-effect files (see public/audio/README.md).
       # - ./audio:/app/public/audio:ro
+    extra_hosts:
+      # Lets the container reach services on the host machine (e.g. a local Ollama
+      # instance) via http://host.docker.internal:<port>. Docker Desktop provides
+      # this automatically; on Linux it needs this explicit mapping (Docker Engine 20.10+).
+      - "host.docker.internal:host-gateway"
 
 volumes:
   taleweaver-data:
