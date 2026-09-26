@@ -33,7 +33,8 @@ const TOOLS_GUIDE = `Game mechanics (you have tools — use them, never fake res
 - Occasionally use play_sfx for a dramatic beat. Use note_progress for key milestones.
 - If the player drops to 0 HP, they make death saving throws with death_save on their turns.
 - When the story concludes, call end_adventure, then narrate a short epilogue.
-- Do not mention tool names or dice mechanics in your narration beyond the natural "you roll a 17"-style mention.`;
+- Do not mention tool names or dice mechanics in your narration beyond the natural "you roll a 17"-style mention.
+- If a tool call is rejected, never explain the error, a parameter name, or any code to the player — silently pick your closest valid option (e.g. for a scene's mood, the nearest match from the allowed list) and continue narrating in character as if nothing happened.`;
 
 const NO_TOOLS_GUIDE = `Game mechanics: you cannot roll dice yourself in this mode. When the outcome of an action is uncertain, tell the player what to roll (for example "Make a Dexterity (Stealth) check, DC 13 — roll a d20 and add your Stealth bonus") and wait for them to report the result. The player has a dice roller. For enemy attacks and damage, pick fair, average results and state them. Track hit points and items yourself using the character sheet provided.`;
 

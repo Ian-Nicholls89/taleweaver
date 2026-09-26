@@ -274,6 +274,25 @@ export class AudioEngine {
           this.blip(out, f * 1.1, 0.1, 'sine', 0.04, 0.15, f * 0.9);
         });
         break;
+      case 'road':
+        bed('lowpass', 600, 0.07, 0.06, 0.05); // open-air wind
+        every(1400, 0.2, () => this.blip(out, 2200 + Math.random() * 1800, 0.15, 'sine', 0.03, 0, 1600)); // sparse, distant birds
+        break;
+      case 'village':
+        bed('bandpass', 320, 0.05, 0.18, 0.03); // gentle, distant murmur — no crowd bustle like a city
+        every(4500, 0.3, () => this.bell(out, 0.03)); // a village bell, rarely
+        every(3000, 0.15, () => this.blip(out, 900 + Math.random() * 300, 0.4, 'triangle', 0.03)); // a distant rooster/animal
+        break;
+      case 'ruins':
+        bed('lowpass', 350, 0.05, 0.04, 0.04); // wind through broken stone
+        every(2600, 0.3, () => this.burst(out, 0.3, 'bandpass', 200 + Math.random() * 150, 0.06, 0, 3)); // a creak or settling stone
+        every(1800, 0.2, () => this.blip(echo, 900 + Math.random() * 700, 0.1, 'sine', 0.04, 0, 500));
+        break;
+      case 'mountain':
+        bed('highpass', 900, 0.035, 0.08, 0.06); // thin, high wind
+        bed('lowpass', 180, 0.05, 0.1, 0.05); // low wind rumble
+        every(7000, 0.25, () => this.blip(out, 1200, 1.4, 'sine', 0.05, 0, 500)); // a distant bird of prey
+        break;
       case 'forest-night':
       case 'camp':
         bed('lowpass', 400, 0.04, 0.04, 0.03);

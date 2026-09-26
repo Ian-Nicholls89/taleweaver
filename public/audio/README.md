@@ -22,8 +22,8 @@ cleanly and be 1–3 minutes long.
 
 ## Tags
 
-Ambience: `tavern`, `forest-day`, `forest-night`, `cave`, `dungeon`, `storm`, `city`, `sea`, `camp`, `temple`,
-`combat`, `tension`, `victory`, `silence`.
+Ambience: `tavern`, `village`, `road`, `forest-day`, `forest-night`, `cave`, `dungeon`, `ruins`, `storm`, `city`,
+`sea`, `camp`, `temple`, `mountain`, `combat`, `tension`, `victory`, `silence`.
 
 Sound effects: `door`, `sword`, `spell`, `coins`, `roar`, `footsteps`, `thunder`, `splash`, `arrow`, `scream`,
 `chest`, `bell`, plus `dice` (played on every roll).
