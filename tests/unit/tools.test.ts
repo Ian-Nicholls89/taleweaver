@@ -87,6 +87,21 @@ describe('DM tools', () => {
     expect(state.scene).toEqual({ title: 'The Gull', ambience: 'tavern', imageId: 'img-1' });
   });
 
+  it('never rejects an ambience word — maps unknowns to the nearest tag instead', async () => {
+    const { run, state } = setup(seq(10));
+    // Now a real tag, since a previous fix added it.
+    await run('set_scene', { title: 'Barrowby', image_prompt: 'a village', ambience: 'village' });
+    expect(state.scene?.ambience).toBe('village');
+
+    // Not a tag, but a known synonym.
+    await run('set_scene', { title: 'The Keep', image_prompt: 'a castle', ambience: 'Castle' });
+    expect(state.scene?.ambience).toBe('ruins');
+
+    // Nothing recognisable at all — falls back to silence rather than erroring.
+    await run('set_scene', { title: '???', image_prompt: 'somewhere odd', ambience: 'spaceship' });
+    expect(state.scene?.ambience).toBe('silence');
+  });
+
   it('reports bad dice instead of throwing', async () => {
     const { run } = setup(seq(10));
     expect(await run('roll_dice', { expr: 'lots', reason: 'x' })).toHaveProperty('error');

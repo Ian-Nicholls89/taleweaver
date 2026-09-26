@@ -3,6 +3,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseAdventureFile } from '@/server/adventures';
 import { buildCharacter, CLASSES, pregens, SPECIES, BACKGROUNDS, BuildError } from '@/server/characters';
+import { nearestAmbience } from '@/server/dm/types';
 
 describe('bundled adventures', () => {
   const dir = path.join(process.cwd(), 'content', 'adventures');
@@ -54,5 +55,24 @@ describe('character builder', () => {
     const list = pregens();
     expect(list.length).toBeGreaterThanOrEqual(4);
     for (const p of list) expect(() => buildCharacter(p.input)).not.toThrow();
+  });
+});
+
+describe('nearestAmbience', () => {
+  it('matches known tags exactly, case-insensitively', () => {
+    expect(nearestAmbience('tavern')).toBe('tavern');
+    expect(nearestAmbience('  Dungeon ')).toBe('dungeon');
+  });
+
+  it('maps common synonyms to the nearest known tag', () => {
+    expect(nearestAmbience('town')).toBe('village');
+    expect(nearestAmbience('a bustling market square')).toBe('city');
+    expect(nearestAmbience('an old crypt')).toBe('ruins');
+    expect(nearestAmbience('mountain peak')).toBe('mountain');
+  });
+
+  it('falls back to silence for anything unrecognised', () => {
+    expect(nearestAmbience('spaceship interior')).toBe('silence');
+    expect(nearestAmbience('')).toBe('silence');
   });
 });

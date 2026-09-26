@@ -7,6 +7,7 @@ import {
   SFX_TAGS,
   SKILLS,
   modifier,
+  nearestAmbience,
   proficiencyBonus,
   type Character,
   type Combatant,
@@ -334,9 +335,15 @@ export function buildTools(ctx: TurnContext) {
           .string()
           .max(600)
           .describe('Visual description of the location for an illustrator: setting, lighting, key figures. No text or UI.'),
-        ambience: z.enum(AMBIENCE_TAGS),
+        ambience: z
+          .string()
+          .max(40)
+          .describe(`The mood/location, e.g. ${AMBIENCE_TAGS.join(', ')}. A close description is fine if none fits exactly.`),
       }),
-      execute: async ({ title, image_prompt, ambience }) => {
+      execute: async ({ title, image_prompt, ambience: rawAmbience }) => {
+        // Never fails on an unlisted word — mapped to the nearest tag we have audio for,
+        // so a model guessing "village" or "castle" doesn't derail the turn.
+        const ambience = nearestAmbience(rawAmbience);
         const imageId = ctx.onScene?.({ title, imagePrompt: image_prompt, ambience }) ?? null;
         ctx.state.scene = { title, ambience, imageId };
         ctx.events.push({ type: 'scene', title, ambience, imageId });

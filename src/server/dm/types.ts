@@ -121,6 +121,81 @@ export const AMBIENCE_TAGS = [
   'silence',
 ] as const;
 
+export type AmbienceTag = (typeof AMBIENCE_TAGS)[number];
+
+/** Common words for places/moods not in AMBIENCE_TAGS, mapped to the nearest tag we do support. */
+const AMBIENCE_SYNONYMS: Record<string, AmbienceTag> = {
+  town: 'village',
+  hamlet: 'village',
+  settlement: 'village',
+  homestead: 'village',
+  farm: 'village',
+  street: 'city',
+  market: 'city',
+  marketplace: 'city',
+  alley: 'city',
+  harbour: 'city',
+  harbor: 'city',
+  docks: 'city',
+  inn: 'tavern',
+  pub: 'tavern',
+  bar: 'tavern',
+  castle: 'ruins',
+  fortress: 'ruins',
+  keep: 'ruins',
+  crypt: 'ruins',
+  graveyard: 'ruins',
+  cemetery: 'ruins',
+  tomb: 'dungeon',
+  swamp: 'forest-night',
+  marsh: 'forest-night',
+  bog: 'forest-night',
+  jungle: 'forest-day',
+  woods: 'forest-day',
+  woodland: 'forest-day',
+  garden: 'forest-day',
+  ocean: 'sea',
+  beach: 'sea',
+  shore: 'sea',
+  coast: 'sea',
+  ship: 'sea',
+  boat: 'sea',
+  cliff: 'mountain',
+  peak: 'mountain',
+  summit: 'mountain',
+  mountains: 'mountain',
+  path: 'road',
+  trail: 'road',
+  highway: 'road',
+  crossroads: 'road',
+  field: 'road',
+  plain: 'road',
+  meadow: 'road',
+  shrine: 'temple',
+  chapel: 'temple',
+  sanctuary: 'temple',
+  altar: 'temple',
+  battle: 'combat',
+  fight: 'combat',
+  skirmish: 'combat',
+};
+
+/**
+ * Resolves whatever ambience word the DM used to one we actually have audio for.
+ * Exact match first, then a word-in-word heuristic, then the safe fallback:
+ * "silence" — a real, defined tag (a deliberately quiet moment), not an error state.
+ */
+export function nearestAmbience(raw: string): AmbienceTag {
+  const key = raw.trim().toLowerCase();
+  if ((AMBIENCE_TAGS as readonly string[]).includes(key)) return key as AmbienceTag;
+  for (const [word, tag] of Object.entries(AMBIENCE_SYNONYMS)) {
+    // Whole-word match only — a plain substring check would let "ship" fire on
+    // "spaceship", or "inn" fire on "beginning".
+    if (new RegExp(`\\b${word}\\b`).test(key)) return tag;
+  }
+  return 'silence';
+}
+
 export const SFX_TAGS = [
   'door',
   'sword',
