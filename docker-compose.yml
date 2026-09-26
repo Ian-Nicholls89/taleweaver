@@ -38,6 +38,14 @@ services:
     container_name: ollama
     restart: unless-stopped
     profiles: ["ollama"]
+    environment:
+      # Ollama unloads a model 5 minutes after its last use by default. On CPU,
+      # reloading it plus reprocessing the prompt from scratch is slow enough to
+      # look like the app has stalled or timed out on the very next turn — this
+      # keeps a model resident for an hour after use instead. Use -1 to never
+      # unload it at all (an 8B model resident in RAM is a few GB, easily
+      # affordable to leave running if you'd rather not think about it).
+      - OLLAMA_KEEP_ALIVE=1h
     volumes:
       - ollama-data:/root/.ollama
     # Uncomment if you have an NVIDIA GPU and the nvidia-container-toolkit installed
