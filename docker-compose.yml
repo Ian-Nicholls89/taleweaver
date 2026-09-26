@@ -41,7 +41,9 @@ services:
     volumes:
       - ollama-data:/root/.ollama
     # Uncomment if you have an NVIDIA GPU and the nvidia-container-toolkit installed
-    # (without it, Ollama runs on CPU only — fine for small models, slow for large ones):
+    # (without it — including Intel Arc/integrated graphics, e.g. Meteor Lake NUCs,
+    # which this image doesn't accelerate — Ollama runs on CPU only: fine for models
+    # up to ~8-14B, slow for larger ones):
     # deploy:
     #   resources:
     #     reservations:
