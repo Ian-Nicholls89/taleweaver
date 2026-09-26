@@ -20,10 +20,36 @@ services:
       # Optional: your own ambience and sound-effect files (see public/audio/README.md).
       # - ./audio:/app/public/audio:ro
     extra_hosts:
-      # Lets the container reach services on the host machine (e.g. a local Ollama
-      # instance) via http://host.docker.internal:<port>. Docker Desktop provides
-      # this automatically; on Linux it needs this explicit mapping (Docker Engine 20.10+).
+      # Only needed if Ollama (or another AI backend) runs directly on this host
+      # rather than as the "ollama" service below — lets the container reach it
+      # via http://host.docker.internal:<port>. Docker Desktop provides this
+      # automatically; on Linux it needs this explicit mapping (Engine 20.10+).
       - "host.docker.internal:host-gateway"
+
+  # Optional: Ollama as its own container, so you don't need it installed on the
+  # host at all. Off by default — start it with:
+  #   docker compose --profile ollama up -d
+  # Then in Admin → AI models, set the Ollama address to http://ollama:11434
+  # (the two containers share a network and can reach each other by service name —
+  # no host.docker.internal needed for this path). Pull a model into it with:
+  #   docker compose exec ollama ollama pull llama3.1
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    profiles: ["ollama"]
+    volumes:
+      - ollama-data:/root/.ollama
+    # Uncomment if you have an NVIDIA GPU and the nvidia-container-toolkit installed
+    # (without it, Ollama runs on CPU only — fine for small models, slow for large ones):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
 
 volumes:
   taleweaver-data:
+  ollama-data:

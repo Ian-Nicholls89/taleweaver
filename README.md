@@ -77,22 +77,35 @@ If the reverse proxy runs on a different machine from the app, set `BIND_ADDRESS
 
 ## Using a local model with Ollama
 
-If you'd rather run the Dungeon Master on your own hardware, free and fully private, [install Ollama](https://ollama.com/download) and pull a model that supports tool calling — `llama3.1`, `qwen2.5` and `mistral-nemo` all work; smaller or older models often can't roll dice or track HP reliably:
+If you'd rather run the Dungeon Master on your own hardware, free and fully private, there are two ways to run Ollama. Either works with Taleweaver the same way once it's reachable.
+
+### Option A: Ollama as a container (no separate install)
+
+`docker-compose.yml` already has an Ollama service, just switched off by default:
 
 ```bash
+docker compose --profile ollama up -d
+docker compose exec ollama ollama pull llama3.1
+```
+
+In **Admin → AI models**, find **Ollama (local)**, set the address to `http://ollama:11434` (the two containers share a network and reach each other by service name), and press **Fetch models**.
+
+If you have an NVIDIA GPU, uncomment the `deploy:` block under the `ollama` service in `docker-compose.yml` first (needs the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) installed on the host) — otherwise it runs on CPU, which is fine for small models and slow for large ones.
+
+### Option B: Ollama installed directly on the host
+
+```bash
+OLLAMA_HOST=0.0.0.0 ollama serve      # or set OLLAMA_HOST=0.0.0.0 in its systemd unit and restart it
 ollama pull llama3.1
 ```
 
-Two things need to be true for Taleweaver's container to reach it:
+Ollama only accepts connections from its own machine by default, which a container can't satisfy — `OLLAMA_HOST=0.0.0.0` opens it up. In **Admin → AI models**, set the address to `http://host.docker.internal:11434`, not `http://localhost:11434` (inside the container, "localhost" means the container itself). `docker-compose.yml` already maps that hostname to the host for you. If Ollama runs on a *different* machine on your network instead, use that machine's LAN IP.
 
-1. **Ollama must listen on more than just `localhost`.** By default it only accepts connections from the same machine, which a container can't do. Run it with:
-   ```bash
-   OLLAMA_HOST=0.0.0.0 ollama serve
-   ```
-   (or set `OLLAMA_HOST=0.0.0.0` in whatever service file starts it, e.g. its systemd unit, then restart it).
-2. **Use `http://host.docker.internal:11434` as the address**, not `http://localhost:11434` — inside the container, "localhost" means the container itself. `docker-compose.yml` already maps `host.docker.internal` to the host for you.
+### Which model to pull
 
-Then in **Admin → AI models**, find **Ollama (local)**, set the URL to `http://host.docker.internal:11434`, and press **Fetch models** — your locally pulled models will appear to enable, exactly like any other provider. If Ollama runs on a *different* machine on your network, use that machine's LAN IP instead.
+Not every model can use tools (roll dice, track HP) — this depends on how the model itself was trained, not on Ollama. `llama3.1`, `qwen2.5`, `mistral-nemo`, `command-r` and `firefunction-v2` all support it; **Gemma 2 and Gemma 3 currently don't**. Taleweaver can't tell from Ollama which models support tools, so every newly fetched Ollama model starts with **Tools** switched off in the model list — turn it on only for ones you know support it (check [ollama.com's tools filter](https://ollama.com/search?c=tools) if unsure).
+
+Running a model without tool support isn't broken, just different: instead of rolling dice itself, the DM tells the player what to roll ("make a DC 13 Dexterity save") and continues from what they report. If you'd like real tool support locally, pull `llama3.1` or `qwen2.5` alongside Gemma and switch between them per game from the game screen's Dungeon Master dropdown.
 
 ## Costs, roughly
 
