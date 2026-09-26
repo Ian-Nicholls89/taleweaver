@@ -170,7 +170,13 @@ export const LLM_PROVIDERS: Record<string, ProviderDef> = {
     urlPlaceholder: 'http://host.docker.internal:11434',
     note:
       "Runs on your own machine — free and private, only as fast as your hardware. Running Ollama as the \"ollama\" service in docker-compose.yml (docker compose --profile ollama up -d)? Use http://ollama:11434. Running it on the Docker host instead? Use http://host.docker.internal:11434, not \"localhost\" (which inside this container means the container itself) — and start Ollama with OLLAMA_HOST=0.0.0.0 set, or it will refuse the connection even at the right address. Newly fetched models default to \"Tools\" off below: only turn it on for ones known to support function calling (llama3.1, qwen2.5, mistral-nemo, command-r, firefunction-v2 do; Gemma 2 and Gemma 3 currently don't) — check https://ollama.com/search?c=tools if unsure. Without it, the DM still runs fine; it just asks the player to roll their own dice instead of rolling for them.",
-    create: (baseUrl, id) => createOllama({ baseURL: `${normaliseUrl(baseUrl)}/api`, compatibility: 'strict' })(id),
+    create: (baseUrl, id) =>
+      // Ollama caps the context window per request (2048 tokens unless told otherwise),
+      // regardless of what the model itself supports. Taleweaver's system prompt (rules
+      // reference + adventure notes + persona) alone typically runs 3,000-6,000+ tokens,
+      // so without this the request gets silently truncated — usually losing the DM
+      // persona and tool instructions, which is why the model ignores them entirely.
+      createOllama({ baseURL: `${normaliseUrl(baseUrl)}/api`, compatibility: 'strict' }).chat(id, { options: { num_ctx: 8192 } }),
     listModels: async (baseUrl) => {
       const json = await getJson(`${normaliseUrl(baseUrl)}/api/tags`);
       // Ollama's /api/tags has no reliable signal for tool-calling support, unlike most
